@@ -28,7 +28,7 @@ jobs:
           use_bundler: true
           fail_on_error: true
       - name: "Upload artifacts test"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: failed-tests-screenshots
           path: path/to/artifact/world.txt
