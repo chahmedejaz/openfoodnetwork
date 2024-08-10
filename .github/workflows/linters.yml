@@ -14,8 +14,21 @@ jobs:
           bundler-cache: true # runs 'bundle install' and caches installed gems automatically
 
       - run: git show --no-patch # the commit being tested (which is often a merge due to actions/checkout@v3)
-      - run: mkdir -p path/to/artifact
-      - run: echo hello > path/to/artifact/world.txt
+
+      - name: Install ImageMagick
+        run: sudo apt-get install -y imagemagick
+
+      - name: Create a small image
+        run: |
+          # Create a 100x100 red image
+          convert -size 100x100 xc:red small_image.png
+
+      - name: Upload the image as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: small-image
+          path: small_image.png
+          retention-days: 7
 
 #      - name: rubocop
 #        uses: reviewdog/action-rubocop@v2
@@ -27,12 +40,12 @@ jobs:
 #          filter_mode: nofilter
 #          use_bundler: true
 #          fail_on_error: true
-      - name: "Upload artifacts test"
-        uses: actions/upload-artifact@v4
-        with:
-          name: failed-tests-screenshots
-          path: path/to/artifact/world.txt
-          retention-days: 7
+#      - name: "Upload artifacts test"
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: failed-tests-screenshots
+#          path: path/to/artifact/world.txt
+#          retention-days: 7
 #  prettier:
 #    name: runner / prettier
 #    runs-on: ubuntu-latest
