@@ -22,9 +22,6 @@ module OpenFoodNetwork
     #   Flipper.enable("dragon_mode")
     #
     CURRENT_FEATURES = {
-      "admin_style_v3" => <<~DESC,
-        Test the work-in-progress design updates.
-      DESC
       "api_reports" => <<~DESC,
         An API endpoint for reports at
         <code>/api/v0/reports/:report_type(/:report_subtype)</code>
@@ -48,7 +45,15 @@ module OpenFoodNetwork
         Activated for a user.
         The user (INRAE researcher) has access to anonymised sales.
       DESC
-    }.freeze
+    }
+
+    if Rails.env.development?
+      CURRENT_FEATURES.merge!({
+                                "admin_style_v3" => <<~DESC,
+                                  Test the work-in-progress design updates.
+                                DESC
+                              })
+    end
 
     # Features you would like to be enabled to start with.
     ACTIVE_BY_DEFAULT = {
@@ -75,6 +80,9 @@ module OpenFoodNetwork
 
     # Checks weather a feature is enabled for any of the given actors.
     def self.enabled?(feature_name, *actors)
+      # TODO: Need to remove these checks when we fully remove the toggle from development as well
+      # need this check as Flipper won't recognize 'admin_style_v3' as it is removed for server envs
+      return true if !Rails.env.development? && feature_name == :admin_style_v3
       return Flipper.enabled?(feature_name) if actors.empty?
 
       actors.any? do |actor|
