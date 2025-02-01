@@ -22,7 +22,7 @@ module Spree
         can :manage, :all
       else
         can [:index, :read], Country
-        can :create, Order
+        can :create, Order unless user.id
         can :read, Order do |order, token|
           order.user == user || (order.token && token == order.token)
         end
@@ -47,7 +47,11 @@ module Spree
       add_group_management_abilities user if can_manage_groups? user
       add_product_management_abilities user if can_manage_products? user
       add_order_cycle_management_abilities user if can_manage_order_cycles? user
-      add_order_management_abilities user if can_manage_orders? user
+      if user.can_manage_orders?
+        add_order_management_abilities user
+      elsif user.can_manage_line_items_in_orders?
+        add_manage_line_items_abilities user
+      end
       add_relationship_management_abilities user if can_manage_relationships? user
     end
 
@@ -75,13 +79,8 @@ module Spree
     # Users can manage order cycles if they manage a sells own/any enterprise
     # OR if they manage a producer which is included in any order cycles
     def can_manage_order_cycles?(user)
-      can_manage_orders?(user) ||
+      user.can_manage_orders? ||
         OrderCycle.visible_by(user).any?
-    end
-
-    # Users can manage orders if they have a sells own/any enterprise.
-    def can_manage_orders?(user)
-      ( user.enterprises.map(&:sells) & %w(own any) ).any?
     end
 
     def can_manage_relationships?(user)
@@ -340,6 +339,22 @@ module Spree
       end
       can [:admin, :edit, :cancel, :resume], ProxyOrder do |proxy_order|
         user.enterprises.include?(proxy_order.subscription.shop)
+      end
+    end
+
+    def add_manage_line_items_abilities(user)
+      can [:admin, :read, :index, :edit, :bulk_management, :update], Spree::Order do |order|
+        user_enterprises_ids = user.enterprises.ids
+
+        order.variants.any? { |variant| user_enterprises_ids.include?(variant.supplier_id) }
+      end
+      can [:index, :create, :destroy, :update], Spree::LineItem do |item|
+        user.enterprises.ids.include?(item.variant.supplier_id)
+      end
+
+      can [:index, :create, :add, :read, :edit, :update], Spree::Shipment do |shipment|
+        order = shipment.order
+        order.variants.any? { |variant| user.enterprises.ids.include?(variant.supplier_id) }
       end
     end
 

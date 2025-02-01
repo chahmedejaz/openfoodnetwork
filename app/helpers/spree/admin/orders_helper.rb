@@ -142,6 +142,17 @@ module Spree
         end
         number_field_tag :quantity, manifest_item.quantity, html_options
       end
+
+      def prepare_shipment_manifest(shipment)
+        manifest = shipment.manifest
+
+        if spree_current_user.can_manage_line_items_in_orders?
+          supplier_ids = spree_current_user.enterprises.ids
+          manifest.select! { |mi| supplier_ids.include?(mi.variant.supplier_id) }
+        end
+
+        manifest
+      end
     end
   end
 end
