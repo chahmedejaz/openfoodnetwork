@@ -348,7 +348,7 @@ module Spree
 
         order.variants.any? { |variant| user_enterprises_ids.include?(variant.supplier_id) }
       end
-      can [:index, :create, :destroy, :update], Spree::LineItem do |item|
+      can [:admin, :index, :create, :destroy, :update], Spree::LineItem do |item|
         user.enterprises.ids.include?(item.variant.supplier_id)
       end
 
@@ -356,6 +356,8 @@ module Spree
         order = shipment.order
         order.variants.any? { |variant| user.enterprises.ids.include?(variant.supplier_id) }
       end
+
+      can [:visible], Enterprise
     end
 
     def add_relationship_management_abilities(user)
