@@ -147,6 +147,19 @@ module Spree
       Enterprise.joins(:connected_apps).merge(ConnectedApps::AffiliateSalesData.ready)
     end
 
+    # Users can manage orders if they have a sells own/any enterprise. or is admin
+    def can_manage_orders?
+      enterprises.pluck(:sells).intersect?(%w(own any)) or admin?
+    end
+
+    def can_manage_line_items_in_orders?
+      enterprises.any?(&:is_producer)
+    end
+
+    def can_manage_line_items_in_orders_only?
+      !can_manage_orders? && can_manage_line_items_in_orders?
+    end
+
     protected
 
     def password_required?
