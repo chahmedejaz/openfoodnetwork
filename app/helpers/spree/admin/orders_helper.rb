@@ -146,7 +146,7 @@ module Spree
       def prepare_shipment_manifest(shipment)
         manifest = shipment.manifest
 
-        if spree_current_user.can_manage_line_items_in_orders?
+        if shipment.order.distributor.enable_producers_to_edit_orders && spree_current_user.can_manage_line_items_in_orders?
           supplier_ids = spree_current_user.enterprises.ids
           manifest.select! { |mi| supplier_ids.include?(mi.variant.supplier_id) }
         end
