@@ -344,17 +344,22 @@ module Spree
 
     def add_manage_line_items_abilities(user)
       can [:admin, :read, :index, :edit, :bulk_management, :update], Spree::Order do |order|
-        user_enterprises_ids = user.enterprises.ids
-
-        order.variants.any? { |variant| user_enterprises_ids.include?(variant.supplier_id) }
+        if order.distributor&.enable_producers_to_edit_orders
+          user_enterprises_ids = user.enterprises.ids
+          order.variants.any? { |variant| user_enterprises_ids.include?(variant.supplier_id) }
+        end
       end
       can [:admin, :index, :create, :destroy, :update], Spree::LineItem do |item|
-        user.enterprises.ids.include?(item.variant.supplier_id)
+        if item.order.distributor&.enable_producers_to_edit_orders
+          user.enterprises.ids.include?(item.variant.supplier_id)
+        end
       end
 
       can [:index, :create, :add, :read, :edit, :update], Spree::Shipment do |shipment|
         order = shipment.order
-        order.variants.any? { |variant| user.enterprises.ids.include?(variant.supplier_id) }
+        if order.distributor&.enable_producers_to_edit_orders
+          order.variants.any? { |variant| user.enterprises.ids.include?(variant.supplier_id) }
+        end
       end
 
       can [:visible], Enterprise
