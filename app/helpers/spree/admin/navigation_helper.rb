@@ -78,7 +78,6 @@ module Spree
         klass = VariantOverride if klass == :Inventory
         klass = ProductImport::ProductImporter if klass == :import
         klass = ::Admin::ReportsController if klass == :report
-
         klass
       end
 
