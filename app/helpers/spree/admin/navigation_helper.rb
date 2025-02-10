@@ -79,10 +79,6 @@ module Spree
         klass = ProductImport::ProductImporter if klass == :import
         klass = ::Admin::ReportsController if klass == :report
 
-        if klass == Spree::Order && spree_current_user.can_manage_line_items_in_orders_only? && !Spree::Order.joins(:distributor, line_items: :supplier).where(supplier: {id: spree_current_user.enterprises.ids}, distributor: {enable_producers_to_edit_orders: true}).exists?
-          klass = ''
-        end
-
         klass
       end
 

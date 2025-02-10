@@ -22,7 +22,7 @@ module Spree
         can :manage, :all
       else
         can [:index, :read], Country
-        can :create, Order unless user.id
+        can :create, Order
         can :read, Order do |order, token|
           order.user == user || (order.token && token == order.token)
         end
@@ -47,9 +47,9 @@ module Spree
       add_group_management_abilities user if can_manage_groups? user
       add_product_management_abilities user if can_manage_products? user
       add_order_cycle_management_abilities user if can_manage_order_cycles? user
-      if user.can_manage_orders?
+      if can_manage_orders? user
         add_order_management_abilities user
-      elsif user.can_manage_line_items_in_orders?
+      elsif can_manage_line_items_in_orders? user
         add_manage_line_items_abilities user
       end
       add_relationship_management_abilities user if can_manage_relationships? user
@@ -79,8 +79,19 @@ module Spree
     # Users can manage order cycles if they manage a sells own/any enterprise
     # OR if they manage a producer which is included in any order cycles
     def can_manage_order_cycles?(user)
-      user.can_manage_orders? ||
+      can_manage_orders?(user) ||
         OrderCycle.visible_by(user).any?
+    end
+
+    # Users can manage orders if they have a sells own/any enterprise.
+    def can_manage_orders?(user)
+      user.can_manage_orders?
+    end
+
+    # Users can manage line items in orders if they have producer enterprise and
+    # any of order distributors allow them to edit their orders.
+    def can_manage_line_items_in_orders?(user)
+      user.can_manage_line_items_in_orders?
     end
 
     def can_manage_relationships?(user)

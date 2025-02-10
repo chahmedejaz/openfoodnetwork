@@ -149,11 +149,15 @@ module Spree
 
     # Users can manage orders if they have a sells own/any enterprise. or is admin
     def can_manage_orders?
-      enterprises.pluck(:sells).intersect?(%w(own any)) or admin?
+      @can_manage_orders ||= (enterprises.pluck(:sells).intersect?(%w(own any)) or admin?)
     end
 
+    # Users can manage line items in orders if they have producer enterprise and
+    # any of order distributors allow them to edit their orders.
     def can_manage_line_items_in_orders?
-      enterprises.any?(&:is_producer)
+      @can_manage_line_items_in_orders ||= enterprises.any?(&:is_producer) && Spree::Order.joins(
+        :distributor, line_items: :supplier
+      ).where(supplier: { id: enterprises.ids }, distributor: { enable_producers_to_edit_orders: true }).exists?
     end
 
     def can_manage_line_items_in_orders_only?
