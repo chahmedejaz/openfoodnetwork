@@ -111,14 +111,14 @@ RSpec.describe Admin::ProductsHelper do
     let(:allowed_producers) { [enterprise] }
     let(:allowed_source_producers) { [] }
     let(:managed_product_enterprises) { [] }
+    subject { helper.variant_displayable?(variant, allowed_producers, allowed_source_producers) }
 
     before do
       allow(helper).to receive(:managed_product_enterprises).and_return(managed_product_enterprises)
     end
 
     it "returns true" do
-      expect(helper.variant_displayable?(variant, allowed_producers,
-                                         allowed_source_producers)).to eq(true)
+      expect(subject).to eq(true)
     end
 
     context "with linked variant" do
@@ -130,8 +130,7 @@ RSpec.describe Admin::ProductsHelper do
         let(:managed_product_enterprises) { [enterprise, hub] }
 
         it "returns true" do
-          expect(helper.variant_displayable?(variant, allowed_producers,
-                                             allowed_source_producers)).to eq(true)
+          expect(subject).to eq(true)
         end
       end
 
@@ -140,8 +139,7 @@ RSpec.describe Admin::ProductsHelper do
         let(:variant) { create(:variant, enterprise:, hub: other_enterprise) }
 
         it "returns false" do
-          expect(helper.variant_displayable?(variant, allowed_producers,
-                                             allowed_source_producers)).to eq(false)
+          expect(subject).to eq(false)
         end
       end
     end
@@ -152,8 +150,7 @@ RSpec.describe Admin::ProductsHelper do
       let(:allowed_producers) { [enterprise, friend_enterprise] }
 
       it "returns true" do
-        expect(helper.variant_displayable?(variant, allowed_producers,
-                                           allowed_source_producers)).to eq(true)
+        expect(subject).to eq(true)
       end
     end
 
@@ -162,8 +159,7 @@ RSpec.describe Admin::ProductsHelper do
       let(:variant) { create(:variant, enterprise: other_enterprise) }
 
       it "returns false" do
-        expect(helper.variant_displayable?(variant, allowed_producers,
-                                           allowed_source_producers)).to eq(false)
+        expect(subject).to eq(false)
       end
     end
 
@@ -171,8 +167,7 @@ RSpec.describe Admin::ProductsHelper do
       let(:variant) { build(:variant, enterprise: nil) }
 
       it "returns true" do
-        expect(helper.variant_displayable?(variant, allowed_producers,
-                                           allowed_source_producers)).to eq(true)
+        expect(subject).to eq(true)
       end
     end
   end
