@@ -27,6 +27,16 @@ RSpec.describe Admin::ProductsHelper do
         expect(data.first[:alt]).to eq(product.name)
         expect(data.first[:caption]).to be_nil
       end
+
+      it 'uses a stored caption when present, otherwise the numbered caption' do
+        product = create(:product_with_image, images_count: 2)
+        product.images.first.update!(caption: 'Fresh from the field')
+
+        data = helper.product_carousel_images_data(product)
+
+        expect(data.first[:caption]).to eq('Fresh from the field')
+        expect(data.second[:caption]).to eq("#{product.name} - 2")
+      end
     end
 
     context 'when product has no images' do

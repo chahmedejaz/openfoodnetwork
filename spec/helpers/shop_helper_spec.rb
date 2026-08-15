@@ -56,6 +56,15 @@ RSpec.describe ShopHelper do
         expect(result[1][:caption]).to eq "Test Product - 2"
         expect(result[2][:caption]).to eq "Test Product - 3"
       end
+
+      it "uses a stored caption when present, otherwise the numbered caption" do
+        product.images.first.update!(caption: "Harvested today")
+
+        result = helper.product_carousel_images_data(product)
+
+        expect(result[0][:caption]).to eq "Harvested today"
+        expect(result[1][:caption]).to eq "Test Product - 2"
+      end
     end
   end
 
