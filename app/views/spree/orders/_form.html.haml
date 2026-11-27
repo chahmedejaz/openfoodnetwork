@@ -59,6 +59,16 @@
             %td.text-right#customer-credit
               %span.order-total= Spree::Money.new(-1 * @paid_with_credit).to_html
 
+        -# E.g. after products were added to an order that was already paid.
+        - if @order.complete? && @order.outstanding_balance.positive?
+          %tr
+            %td.text-right{colspan: "3"}
+              %h5.not-paid
+                = t :order_balance_due
+            %td.text-right
+              %h5.not-paid#balance-due= @order.display_outstanding_balance.to_html
+            %td
+
         - if @order.total_tax > 0
           %tr
             %td.text-right{colspan:"3"}
